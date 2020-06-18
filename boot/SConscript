@@ -1,0 +1,3 @@
+Import('env')
+
+env.StaticObject(target='bootsector.bin', source='bootsector.asm')
