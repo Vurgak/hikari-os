@@ -1,0 +1,13 @@
+display_library: x, options="gui_debug"
+magic_break: enabled=1
+log: ./logs/bochsout.txt
+
+cpu: count=2, reset_on_triple_fault=0
+megs: 512
+
+clock: sync=realtime, time0=local
+
+ata0-master: type=disk, path="build/hikari-os-0.1.0.img", mode=flat
+boot: c
+
+mouse: enabled=0

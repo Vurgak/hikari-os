@@ -1,3 +1,7 @@
-Import('env')
+#!/usr/bin/env python
 
-env.StaticObject(target='bootsector.bin', source='bootsector.asm')
+Import("env")
+
+env.StaticObject(target="bootsector.bin", source="bootsector.asm")
+
+env.StaticObject(target="bootloader.bin", source="bootloader.asm")

@@ -1,3 +1,8 @@
 *[Bb]uild*/
 
 .sconsign.dblite
+
+bx_enh_dbg.ini
+
+logs/*
+!logs/.gitkeep
