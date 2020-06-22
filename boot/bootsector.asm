@@ -66,47 +66,8 @@ bootsector:
         jmp     0x0000:0x7C00
 
 
-; Parameters:
-;       DS:SI   Pointer to the string to be printed.
-write_string:
-        push    ax
-        push    si
-
-        mov     ah, 0x0E
-
-.write_next_char:
-        lodsb
-        cmp     al, 0x00
-        je      .exit
-
-        int     0x10
-        jmp     .write_next_char
-
-.exit:
-        pop     si
-        pop     ax
-        ret
-
-
-; Parameters:
-;       DS:SI   Pointer to the error message string to be printed.
-write_error:
-        push    si
-
-        push    si
-        mov     si, error_msg
-        call    write_string
-        pop     si
-
-        call    write_string
-
-        pop     si
-        ret
-
-
 partition_entry_size    equ     16
 
-error_msg               db      "Error: ", 0x00
 no_bootable_partition_msg db    "No bootable partition was found.", 0x00
 disk_read_failure_msg   db      "Failed to load the active partition.", 0x00
 
@@ -118,6 +79,9 @@ disk_address_packet:
 .buffer_offset:         dw      0x7C00
 .buffer_segment:        dw      0x0000
 .first_sector:          dq      0x00
+
+
+%include        "boot/stage1/vga.asm"
 
 
 times   446 - ($ - $$)  db      0x00

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-Import("env")
+Import("host_env")
 
-env.StaticObject(target="bootsector.bin", source="bootsector.asm")
+AlwaysBuild(host_env.StaticObject(target="bootsector.bin", source="bootsector.asm"))
 
-env.StaticObject(target="bootloader.bin", source="bootloader.asm")
+AlwaysBuild(host_env.StaticObject(target="bootloader.bin", source="bootloader.asm"))

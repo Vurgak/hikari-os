@@ -3,7 +3,8 @@
 import os
 import subprocess
 
-env = Environment(platform="posix", tools=["default", "nasm"], ASFLAGS="-f bin")
-Export("env")
+host_env = Environment(tools=["default", "nasm"], ASFLAGS="-f bin")
+Export("host_env")
 
-SConscript("boot/SConscript", variant_dir="build/boot", duplicate=0)
+boot_dir = SConscript("boot/SConscript", variant_dir="build/boot", duplicate=0)
+tools_dir = SConscript("tools/Sconscript", variant_dir="build/tools", duplicate=0)
