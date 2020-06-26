@@ -29,7 +29,7 @@ write_error:
         push    si
 
         push    si
-        mov     si, .error_msg
+        mov     si, .msg
         call    write_string
         pop     si
 
@@ -38,4 +38,4 @@ write_error:
         pop     si
         ret
 
-.error_msg:             db      "Error: ", 0x00
+.msg            db      "[  ERROR  ] "

@@ -1,0 +1,5 @@
+#!/usr/bin/env python
+
+Import("host_env")
+
+host_env.Program("hkfs_tools", "hkfs_tools.c")

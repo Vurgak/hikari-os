@@ -5,6 +5,9 @@ bits    16
 
 
 bootsector:
+        cli
+        cld
+
         ; Make sure that segment registers are all set to zero.
         mov     ax, 0x0000
         mov     ds, ax
@@ -27,6 +30,10 @@ bootsector:
         jmp     0x0000:.relocated_code
 
 .relocated_code:
+        mov     [drive_number], dl
+
+        sti
+
         ; Find the first active partition.
         mov     bx, partition_table.fst_status
         mov     cl, 0
@@ -63,6 +70,8 @@ bootsector:
         hlt
 
 .jump_to_loaded_code:
+        mov     dl, [drive_number]
+        mov     dh, cl                  ; Partition number.
         jmp     0x0000:0x7C00
 
 
@@ -70,6 +79,9 @@ partition_entry_size    equ     16
 
 no_bootable_partition_msg db    "No bootable partition was found.", 0x00
 disk_read_failure_msg   db      "Failed to load the active partition.", 0x00
+
+
+drive_number            db      0x00
 
 
 disk_address_packet:
