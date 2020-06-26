@@ -8,4 +8,4 @@ host_env.Append(CCFLAGS="-g")
 Export("host_env")
 
 boot_dir = SConscript("boot/SConscript", variant_dir="build/boot", duplicate=0)
-tools_dir = SConscript("tools/Sconscript", variant_dir="build/tools", duplicate=0)
+tools_dir = SConscript("tools/SConscript", variant_dir="build/tools", duplicate=0)
