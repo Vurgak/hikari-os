@@ -50,10 +50,7 @@ stage1:
         mov     dl, [drive_number]
         mov     dh, [partition_number]
         mov     di, stage2
-        xchg    bx, bx
         call    read_sectors_from_partition
-
-        mov     eax, 0x12345678
 
         jmp     stage2
 
@@ -96,8 +93,58 @@ stage2:
         mov     si, a20_enabled_msg
         call    write_status
 
-        mov     si, everything_works_msg
+        ; Enter the Unreal Mode.
+
+        cli
+        call    disable_nmi
+
+        lgdt    [gdt_pointer]
+
+        mov     eax, cr0
+        or      eax, 1
+        mov     cr0, eax
+
+        jmp     0x0008:.temporary_protected_mode
+
+.temporary_protected_mode:
+        mov     eax, cr0
+        and     eax, ~1
+        mov     cr0, eax
+
+        jmp     0x0000:.enter_unreal_mode
+
+.enter_unreal_mode:
+        sti
+        call    enable_nmi
+
+        mov     si, entered_unreal_mode_msg
         call    write_status
+
+        ; Enter the Protected Mode.
+
+        cli
+        call    disable_nmi
+
+        mov     eax, cr0
+        or      eax, 1
+        mov     cr0, eax
+
+        jmp     0x0018:.enter_protected_mode
+
+align   4
+bits    32
+.enter_protected_mode:
+        mov     ax, 0x20
+        mov     ds, ax
+        mov     es, ax
+        mov     gs, ax
+        mov     fs, ax
+        mov     ss, ax
+
+        sti
+        call    enable_nmi
+
+        mov     eax, 0x12345678
 
         cli
         hlt
@@ -106,7 +153,7 @@ stage2:
 loaded_stage2_msg       db      "Loaded the Stage2.", 0x0A, 0x0D, 0x00
 a20_enabled_msg         db      "Enabled the A20 line.", 0x0A, 0x0D, 0x00
 a20_disabled_msg        db      "Failed to enable the A20 line.", 0x0A, 0x0D, 0x00
-everything_works_msg    db      "Everything works!", 0x0A, 0x0D, 0x00
+entered_unreal_mode_msg db      "Entered the Unreal Mode.", 0x0A, 0x0D, 0x00
 
 
 %include        "boot/stage2/a20.asm"
