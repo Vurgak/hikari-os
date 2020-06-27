@@ -67,7 +67,6 @@ partition_number        db      0x00
 %include        "boot/stage1/vga.asm"
 %include        "boot/stage1/disk.asm"
 %include        "boot/stage2/disk.asm"
-%include        "boot/stage2/gdt.asm"
 %include        "boot/stage2/keyboard.asm"
 %include        "boot/stage2/nmi.asm"
 %include        "boot/stage2/partition.asm"
@@ -93,6 +92,25 @@ stage2:
         mov     si, a20_enabled_msg
         call    write_status
 
+        ; Check if the CPU has x86_64 capabilities.
+        call    is_cpuid_supported
+        jnc     .cpuid_supported
+
+        mov     si, cpuid_not_supported_msg
+        call    write_error
+        cli
+        hlt
+
+.cpuid_supported:
+        call    is_long_mode_supported
+        jnc     .long_mode_supported
+
+        mov     si, long_mode_not_supported_msg
+        call    write_error
+        cli
+        hlt
+
+.long_mode_supported:
         ; Enter the Unreal Mode.
 
         cli
@@ -144,7 +162,8 @@ bits    32
         sti
         call    enable_nmi
 
-        mov     eax, 0x12345678
+        mov     eax, 0x70427041
+        mov     [0xB8000], eax
 
         cli
         hlt
@@ -153,10 +172,14 @@ bits    32
 loaded_stage2_msg       db      "Loaded the Stage2.", 0x0A, 0x0D, 0x00
 a20_enabled_msg         db      "Enabled the A20 line.", 0x0A, 0x0D, 0x00
 a20_disabled_msg        db      "Failed to enable the A20 line.", 0x0A, 0x0D, 0x00
+cpuid_not_supported_msg db      "CPUID is not supported by the CPU.", 0x0A, 0x0D, 0x00
+long_mode_not_supported_msg db  "Long Mode isn't supported by the CPU", 0x0A, 0x0D, 0x00
 entered_unreal_mode_msg db      "Entered the Unreal Mode.", 0x0A, 0x0D, 0x00
 
 
 %include        "boot/stage2/a20.asm"
+%include        "boot/stage2/cpu.asm"
+%include        "boot/stage2/gdt.asm"
 %include        "boot/stage2/vga.asm"
 
 
