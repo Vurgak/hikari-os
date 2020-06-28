@@ -162,8 +162,27 @@ bits    32
         sti
         call    enable_nmi
 
-        mov     eax, 0x70427041
-        mov     [0xB8000], eax
+        ; Enter the Long Mode.
+
+        call    initialize_paging_and_enable_long_mode
+
+        mov     dword [0xB8000], 0x70427041
+
+        jmp     0x28:.enter_long_mode
+
+align   8
+bits    64
+.enter_long_mode:
+        mov     ax, 0x0000
+        mov     ds, ax
+        mov     es, ax
+        mov     fs, ax
+        mov     gs, ax
+        mov     ss, ax
+
+        ; Write black-on-white "ABCD" in the top left corner.
+        mov     rax, 0x7044704370427041
+        mov     [0xB8000], rax
 
         cli
         hlt
@@ -180,6 +199,7 @@ entered_unreal_mode_msg db      "Entered the Unreal Mode.", 0x0A, 0x0D, 0x00
 %include        "boot/stage2/a20.asm"
 %include        "boot/stage2/cpu.asm"
 %include        "boot/stage2/gdt.asm"
+%include        "boot/stage2/paging.asm"
 %include        "boot/stage2/vga.asm"
 
 
@@ -187,4 +207,4 @@ align   4, db 0x00
 sector_buffer:          times   512     db      0x00
 
 
-times   4096 * 4        db      0x00
+times   4096 * 8        db      0x00
