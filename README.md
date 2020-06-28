@@ -24,6 +24,7 @@ the tools needed:
 None of the build process steps require root provileges.
 
 ```sh
+$ toolchain/install.sh
 $ scons -j 4
 $ make image
 ```

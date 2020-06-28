@@ -4,6 +4,8 @@ IMAGE_PATH := build/$(IMAGE_NAME)
 QEMU_SERIAL_TARGET ?= file:logs/serial.txt
 QEMU_FLAGS := -no-reboot -no-shutdown -m 512M -serial $(QEMU_SERIAL_TARGET)
 
+.PHONY: image system-partition clean bochs qemu
+
 image: system-partition
 	tools/write_mbr_entry.py build/boot/bootsector.bin 0 build/system_partition.bin
 
