@@ -1,15 +1,16 @@
 bits    16
 
-; Read a double-word value from a disk.
+
+; Read a byte value from a disk.
 ;
 ; Parameters:
 ;       EBX:EAX Address of the dword to read.
 ;       DL      Drive number.
 ;
 ; Returns:
-;       EAX     Readen value.
+;       AL      Readen value.
 ;       CF      Clear on success; set on error.
-read_dword_from_disk:
+read_byte_from_disk:
         push    ebx
         push    ecx
         push    ebp
@@ -28,7 +29,7 @@ read_dword_from_disk:
         mov     di, sector_buffer
         call    read_sectors_from_disk
         
-        mov     eax, [sector_buffer + ebp]
+        mov     al, [sector_buffer + ebp]
 
         pop     di
         pop     ebp

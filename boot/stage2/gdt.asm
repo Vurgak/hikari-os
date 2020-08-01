@@ -2,7 +2,7 @@ bits    16
 
 
 align   8, db 0x00
-gdt:
+global_descriptor_table:
 .null_descriptor        dq      0x0000000000000000
 .unreal_code_descriptor dq      0x008F9A000000FFFF
 .unreal_data_descriptor dq      0x008F92000000FFFF
@@ -15,5 +15,5 @@ gdt:
 
 align   8, db 0x00
 gdt_pointer:
-.size:                  dw      gdt.end - gdt
-.address:               dq      gdt
+.size:                  dw      global_descriptor_table.end - global_descriptor_table - 1
+.address:               dq      global_descriptor_table

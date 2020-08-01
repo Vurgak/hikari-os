@@ -66,10 +66,9 @@ partition_number        db      0x00
 
 %include        "boot/stage1/vga.asm"
 %include        "boot/stage1/disk.asm"
-%include        "boot/stage2/disk.asm"
-%include        "boot/stage2/keyboard.asm"
-%include        "boot/stage2/nmi.asm"
-%include        "boot/stage2/partition.asm"
+%include        "boot/stage1/keyboard.asm"
+%include        "boot/stage1/nmi.asm"
+%include        "boot/stage1/partition.asm"
 
 
 times   512 - ($ - $$)  db      0x00
@@ -125,6 +124,13 @@ stage2:
         jmp     0x0008:.temporary_protected_mode
 
 .temporary_protected_mode:
+        mov     ax, 0x10
+        mov     ds, ax
+        mov     es, ax
+        mov     fs, ax
+        mov     gs, ax
+        mov     ss, ax
+
         mov     eax, cr0
         and     eax, ~1
         mov     cr0, eax
@@ -132,11 +138,25 @@ stage2:
         jmp     0x0000:.enter_unreal_mode
 
 .enter_unreal_mode:
+        xor     ax, ax
+        mov     ds, ax
+        mov     es, ax
+        mov     fs, ax
+        mov     gs, ax
+        mov     ss, ax
+
         sti
         call    enable_nmi
 
         mov     si, entered_unreal_mode_msg
         call    write_status
+
+        ; Load the kernel file from the disk into the upper memory.
+        mov     dl, [drive_number]
+        mov     dh, [partition_number]
+        mov     esi, kernel_file_name
+        mov     edi, 0x100000           ; 1 MiB.
+        call    hkfs_load_file
 
         ; Enter the Protected Mode.
 
@@ -184,9 +204,25 @@ bits    64
         mov     rax, 0x7044704370427041
         mov     [0xB8000], rax
 
+        mov     rsi, 0x100000
+        mov     rdi, 0xB83C0
+        mov     rcx, 100
+.print_loop:
+        mov     al, [rsi]
+        mov     [rdi], al
+        add     rsi, 1
+        add     rdi, 2
+        dec     rcx
+        cmp     rcx, 0
+        jne     .print_loop
+
         cli
         hlt
+        xchg    bx, bx
+        jmp     $
 
+
+kernel_file_name        db      "kernel.bin", 0x00
 
 loaded_stage2_msg       db      "Loaded the Stage2.", 0x0A, 0x0D, 0x00
 a20_enabled_msg         db      "Enabled the A20 line.", 0x0A, 0x0D, 0x00
@@ -198,13 +234,18 @@ entered_unreal_mode_msg db      "Entered the Unreal Mode.", 0x0A, 0x0D, 0x00
 
 %include        "boot/stage2/a20.asm"
 %include        "boot/stage2/cpu.asm"
+%include        "boot/stage2/disk.asm"
 %include        "boot/stage2/gdt.asm"
+%include        "boot/stage2/hikarifs.asm"
+%include        "boot/stage2/math.asm"
 %include        "boot/stage2/paging.asm"
+%include        "boot/stage2/partition.asm"
+%include        "boot/stage2/string.asm"
 %include        "boot/stage2/vga.asm"
 
 
-align   4, db 0x00
-sector_buffer:          times   512     db      0x00
+align   512, db 0x00
+sector_buffer           times   512     db      0x00
 
 
 times   4096 * 8        db      0x00
